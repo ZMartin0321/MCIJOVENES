@@ -7,7 +7,12 @@ import {
 import express from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { CommonEngine } from '@angular/ssr/node'
+import { render } from '@netlify/angular-runtime/common-engine.mjs'
 
+const commonEngine = new CommonEngine()
+
+export async function netlifyCommonEngineHandler(request: Request, context: any): Promise<Response> {
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
 
@@ -63,4 +68,8 @@ if (isMainModule(import.meta.url)) {
 /**
  * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
  */
-export const reqHandler = createNodeRequestHandler(app);
+ 
+return await render(commonEngine)
+}
+
+export const reqHandler = createNodeRequestHandler(express());
