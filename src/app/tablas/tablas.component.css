@@ -1,0 +1,353 @@
+body {
+  min-height: 100vh;
+  background:
+    linear-gradient(135deg, #47b0ec 0%, #b6e0fe 100%),
+    url('../../assets/images/MCI.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+:host {
+  min-height: 100vh;
+  display: block;
+  background:
+    linear-gradient(135deg, #47b0ec 0%, #b6e0fe 100%),
+    url('../../assets/images/MCI.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', sans-serif;
+}
+/* Contenedor centrado */
+.tablas-container {
+  max-width: 900px;
+  margin: 40px auto;
+  background: rgba(255,255,255,0.92);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(70, 160, 255, 0.15);
+  padding: 2rem 2.5rem;
+}
+
+/* Tabla azul/celeste */
+table {
+  border-collapse: separate;
+  border-spacing: 4px;
+  width: 100%;
+  margin-top: 16px;
+  background: #eaf6ff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(70, 160, 255, 0.08);
+}
+
+td, th {
+  border: 1.5px solid #7ecbff;
+  padding: 12px 14px;
+  text-align: center;
+  background: #f5fbff;
+  min-width: 80px;
+  max-width: 140px;
+  word-break: break-word;
+  font-size: 1.05em;
+}
+
+th {
+  background: #47b0ec;
+  color: #fff;
+  font-weight: bold;
+}
+
+tr:nth-child(even) td {
+  background-color: #d0eaff;
+}
+
+tr:hover td {
+  background-color: #b6e0fe;
+}
+
+/* Inputs y botones */
+input {
+  width: 100%;
+  min-width: 60px;
+  text-align: center;
+  font-size: 1em;
+  padding: 6px 0;
+  border-radius: 6px;
+  border: 1px solid #47b0ec;
+  background: #f0f8ff;
+  color: #1a237e;
+}
+
+input:focus {
+  outline: none;
+  border-color: #1976d2;
+  background: #e3f2fd;
+}
+
+button {
+  background: #47b0ec;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 8px 0;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(70, 160, 255, 0.08);
+}
+
+button:hover {
+  background: #1976d2;
+}
+
+/* Formulario modal */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh; /* Puedes usar 100vh si quieres que ocupe toda la altura */
+  margin: 0 auto;
+}
+.modal-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* Formulario Apartado */
+.apartado-toggle {
+  margin-bottom: 16px;
+}
+.apartado-toggle button {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  color: #1565c0;
+  padding: 8px 18px;
+  margin-right: 8px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.apartado-toggle button.selected,
+.apartado-toggle button:hover {
+  background: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+}
+
+
+
+/* menssaje de confirmacion  */
+
+.mensaje-confirmacion-global {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4caf50;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  z-index: 1000;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* barra lateral  */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 210px;
+  height: 100vh;
+  background: #263238;
+  color: #fff;
+  padding: 24px 12px 12px 12px;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.main-content {
+  margin-left: 220px;
+  padding: 20px;
+}
+.mensaje-confirmacion-global {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4caf50;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  z-index: 1000;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Botón hamburguesa para mostrar la barra */
+.sidebar-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 2000;
+  background: transparent; 
+  color: #263238;           
+  border: none;
+  font-size: 2em;
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  box-shadow: none;         /* Sin sombra */
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar-toggle:hover {
+  background: rgba(70, 160, 255, 0.08); /* Un leve fondo al pasar el mouse (opcional) */
+  color: #1976d2;
+}
+.close-sidebar {
+  float: right;
+  cursor: pointer;
+  font-size: 1.5em;
+  margin-left: 10px;
+  color: #fff;
+  transition: color 0.2s;
+}
+.close-sidebar:hover {
+  color: #ff5252;
+}
+
+
+/* Fromualrio de Regsitro de Asistencia */
+.modal-form {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(70, 160, 255, 0.13);
+  padding: 32px 28px 28px 28px;
+  min-width: 420px;   /* antes 290px */
+  max-width: 600px;   /* antes 350px */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: stretch;
+  transition: box-shadow 0.2s;
+}
+
+.modal-form label {
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 2px;
+  margin-top: 0;
+  font-size: 1.08em;
+}
+
+.modal-form input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #90caf9;
+  background: #f5fbff;
+  font-size: 1em;
+  margin-bottom: 0;
+  transition: border 0.2s;
+}
+
+.modal-form input:focus {
+  border-color: #1976d2;
+  outline: none;
+  background: #e3f2fd;
+}
+
+.selector-grupo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0;
+  margin-top: 2px;
+}
+
+.selector-grupo button {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1.5px solid #90caf9;
+  border-radius: 8px;
+  padding: 7px 28px; /* <-- aquí aumenté el valor de 18px a 28px */
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(70, 160, 255, 0.07);
+}
+
+.selector-grupo button.selected,
+.selector-grupo button:hover {
+  background: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+  box-shadow: 0 2px 8px rgba(70, 160, 255, 0.13);
+}
+
+.modal-form .botones {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.modal-form .botones button {
+  min-width: 180px;      /* antes 140px */
+  padding: 12px 0;       /* antes 10px 0 */
+  font-size: 1.08em;
+  border-radius: 8px;
+  font-weight: 700;
+  background: #47b0ec;
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(70, 160, 255, 0.08);
+  transition: background 0.2s;
+}
+
+.modal-form .botones button:hover {
+  background: #1976d2;
+}
+
+.modal-form label {
+  display: block;
+  text-align: center;
+  width: 100%;
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 4px;
+  margin-top: 12px;
+  font-size: 1.08em;
+}
+
+.modal-form > label:first-child {
+  margin-top: 0;
+}
+
+/* Centrar los botones del área en el formulario modal */
+.modal-form .selector-grupo:first-of-type {
+  justify-content: center;
+}
+.modal-form .selector-grupo {
+  justify-content: center;
+} 
+
+/* Modal único para agregar, modificar y eliminar discípulo */
+.modal-form input,
+.modal-form select {
+  margin-bottom: 16px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  width: 70%;      /* Puedes ajustar el porcentaje según tu preferencia */
+  min-width: 180px;
+  max-width: 350px;
+}

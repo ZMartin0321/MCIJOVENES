@@ -1,0 +1,328 @@
+<!-- Mensaje global de confirmación -->
+<div *ngIf="mensajeAsistencia" class="mensaje-confirmacion-global">
+  {{ mensajeAsistencia }}
+</div>
+
+<!-- Botón para mostrar la barra lateral cuando está oculta -->
+<button 
+  *ngIf="!mostrarSidebar" 
+  class="sidebar-toggle" 
+  (click)="mostrarSidebar = true"
+  aria-label="Mostrar menú">
+  &#9776;
+</button>
+
+<!-- Menú lateral deslizante -->
+<div class="sidebar" *ngIf="mostrarSidebar">
+  <h3>Menu MCI 
+    <span class="close-sidebar" (click)="mostrarSidebar = false" title="Ocultar menú">&times;</span>
+  </h3>
+  <button (click)="mostrarEntornoTrabajo = true; mostrarRegistrarAsistencia = false;mostrarFormulario = false;mostrarRegistrarMotivoTodos = false; mostrarSidebar = false">Entorno de trabajo</button>
+  <button (click)="mostrarRegistrarAsistencia = true; mostrarEntornoTrabajo = false;mostrarFormulario = false;mostrarRegistrarMotivoTodos = false; mostrarSidebar = false">Registrar Asistencia</button>
+  <button (click)="mostrarFormulario = true; mostrarEntornoTrabajo = false; mostrarRegistrarAsistencia = false;mostrarRegistrarMotivoTodos = false; mostrarSidebar = false">Registrar Discipulos</button>
+  <button (click)="mostrarRegistrarMotivoTodos = true; mostrarEntornoTrabajo = false; mostrarRegistrarAsistencia = false; mostrarFormulario = false; mostrarSidebar = false">Registrar Feriado/No hubo</button>
+  <button (click)="mostrarRegistrarOfrenda = true; mostrarEntornoTrabajo = false; mostrarRegistrarAsistencia = false; mostrarFormulario = false; mostrarRegistrarMotivoTodos = false; mostrarSidebar = false">
+  Registrar Ofrenda
+</button>
+  <button (click)="exportToExcel()" *ngIf="data.length">Exportar a Excel</button>
+  <button (click)="guardarEnBaseDeDatos()">Guardar</button>
+</div>
+
+<!-- Contenido principal -->
+<div class="main-content" [ngClass]="{'sidebar-hidden': !mostrarSidebar}">
+  <!-- Entorno de trabajo -->
+  <ng-container *ngIf="mostrarEntornoTrabajo">
+    <!-- Selector de archivo Excel -->
+    <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+
+    <!-- Visualización de la tabla -->
+    <table *ngIf="hojaActual === 1 ? data.length : dataHoja2.length">
+  <tr *ngFor="let row of hojaActual === 1 ? data : dataHoja2; let i = index">
+    <ng-container *ngFor="let cell of row; let j = index">
+      <!-- Mostrar todas las columnas en hoja 1, solo la columna 2 (C) en hoja 2 -->
+      <td *ngIf="hojaActual === 1 
+                  ? !isMergedCell(i, j) 
+                  : (!isMergedCellHoja2(i, j) && j === 2)"
+          [attr.colspan]="hojaActual === 1 ? getColspan(i, j) : getColspanHoja2(i, j)"
+          [attr.rowspan]="hojaActual === 1 ? getRowspan(i, j) : getRowspanHoja2(i, j)">
+        <ng-container *ngIf="(hojaActual === 1 ? data[i][j] : dataHoja2[i][j]) !== undefined; else emptyCell">
+          <input 
+            [ngModel]="hojaActual === 1 ? data[i][j] : dataHoja2[i][j]" 
+            (ngModelChange)="hojaActual === 1 ? data[i][j] = $event : dataHoja2[i][j] = $event" />
+        </ng-container>
+        <ng-template #emptyCell>
+          &nbsp;
+        </ng-template>
+      </td>
+    </ng-container>
+  </tr>
+</table>
+
+    <div class="botones-principales">
+      <button (click)="exportToExcel()" *ngIf="data.length">Exportar a Excel</button>
+      <button (click)="descargarOriginal()" *ngIf="originalFileBuffer">Descargar archivo original</button>
+      <button (click)="guardarEnBaseDeDatos()">Guardar</button>
+    </div>
+
+
+    <!-- Listado de usuarios para editar/eliminar -->
+    <div *ngIf="mostrarEditarEliminar" class="modal-form">
+      <label>Selecciona usuario:</label>
+      <select [(ngModel)]="usuarioSeleccionado">
+        <option *ngFor="let usuario of getUsuariosUnicos()" [value]="usuario">{{ usuario }}</option>
+      </select>
+      <button (click)="prepararEdicion()">Editar</button>
+      <button (click)="eliminarUsuarioEnTodasLasTablas(usuarioSeleccionado); mostrarEditarEliminar = false;">Eliminar</button>
+      <button (click)="mostrarEditarEliminar = false">Cerrar</button>
+    </div>
+
+    <!-- Formulario de edición de usuario -->
+    <div *ngIf="editandoUsuario" class="modal-form">
+      <label>Nuevo nombre:</label>
+      <input [(ngModel)]="nuevoNombreEditar" />
+      <label>Nueva edad:</label>
+      <input [(ngModel)]="nuevaEdadEditar" type="number" />
+      <button (click)="editarUsuarioEnTodasLasTablas(usuarioSeleccionado, nuevoNombreEditar, nuevaEdadEditar); editandoUsuario=false;">Guardar</button>
+      <button (click)="editandoUsuario=false">Cancelar</button>
+    </div>
+
+    <!-- Selector de hoja -->
+    <div class="selector-grupo" *ngIf="data.length || dataHoja2.length">
+      <button [class.selected]="hojaActual === 1" (click)="verHoja(1)">Ver Hoja 1</button>
+      <button [class.selected]="hojaActual === 2" (click)="verHoja(2)">Ver Hoja 2</button>
+    </div>
+  </ng-container>
+
+<!-- Registro de asistencia SOLO si se activa desde el menú -->
+<ng-container *ngIf="mostrarRegistrarAsistencia">
+  <div class="modal-form">
+    <!-- Selección de tabla -->
+    <label>¿En qué Area desea registrar la asistencia?🤔</label>
+    <div class="selector-grupo">
+      <button
+        type="button"
+        [class.selected]="tablaSeleccionada === 1"
+        (click)="tablaSeleccionada = 1; nombresSeleccionados = []; mesSeleccionado = ''; semanaSeleccionada = 0;">
+        Celugrama
+      </button>
+      <button
+        type="button"
+        [class.selected]="tablaSeleccionada === 2"
+        (click)="tablaSeleccionada = 2; nombresSeleccionados = []; mesSeleccionado = ''; semanaSeleccionada = 0;">
+        Somos Uno
+      </button>
+      <button
+        type="button"
+        [class.selected]="tablaSeleccionada === 3"
+        (click)="tablaSeleccionada = 3; nombresSeleccionados = []; mesSeleccionado = ''; semanaSeleccionada = 0;">
+        Intercesión
+      </button>
+    </div>
+
+    <!-- Selección múltiple de discípulos -->
+    <ng-container *ngIf="tablaSeleccionada">
+    <label>Discipulos:🧑‍🤝‍🧑</label>
+    <div class="selector-grupo">
+      <button
+        type="button"
+        *ngFor="let usuario of getUsuariosUnicos()"
+        [class.selected]="nombresSeleccionados.includes(usuario)"
+        (click)="toggleSeleccionDisciple(usuario)">
+        {{ usuario }}
+      </button>
+    </div>
+  </ng-container>
+
+    <!-- Mes solo si hay al menos un nombre seleccionado -->
+    <ng-container *ngIf="tablaSeleccionada && nombresSeleccionados && nombresSeleccionados.length">
+      <label>Mes:📅</label>
+      <div class="selector-grupo">
+        <button 
+          type="button"
+          *ngFor="let mes of ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']"
+          [class.selected]="mesSeleccionado === mes"
+          (click)="mesSeleccionado = mes; semanaSeleccionada = 0;">
+          {{ mes | titlecase }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Semana solo si hay mes seleccionado -->
+    <ng-container *ngIf="tablaSeleccionada && nombresSeleccionados && nombresSeleccionados.length && mesSeleccionado">
+      <label>Semana:📅</label>
+      <div class="selector-grupo">
+        <button 
+          type="button"
+          *ngFor="let semana of [1,2,3,4,5]"
+          [class.selected]="semanaSeleccionada === semana"
+          (click)="semanaSeleccionada = semana">
+          {{ semana }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Botones solo si todo está seleccionado -->
+    <ng-container *ngIf="tablaSeleccionada && nombresSeleccionados && nombresSeleccionados.length && mesSeleccionado && semanaSeleccionada">
+      <div class="botones">
+        <button (click)="registrarAsistencia(nombresSeleccionados, semanaSeleccionada, mesSeleccionado, tablaSeleccionada)">
+          <i class="fa-solid fa-user-check"></i> Registrar Asistencia
+        </button>
+        <button (click)="mostrarRegistrarAsistencia = false" type="button">
+          <i class="fa-solid fa-xmark"></i> Cerrar
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>
+
+<!-- Modal único para agregar, modificar y eliminar discípulo -->
+<ng-container *ngIf="mostrarFormulario">
+  <div class="modal-form">
+    <label>¿Qué acción deseas realizar?</label>
+    <div class="selector-grupo">
+      <button [class.selected]="accionUsuario === 'agregar'" (click)="accionUsuario = 'agregar'; limpiarCamposUsuario()">Agregar</button>
+      <button [class.selected]="accionUsuario === 'modificar'" (click)="accionUsuario = 'modificar'; limpiarCamposUsuario()">Modificar</button>
+      <button [class.selected]="accionUsuario === 'eliminar'" (click)="accionUsuario = 'eliminar'; limpiarCamposUsuario()">Eliminar</button>
+    </div>
+
+    <!-- Selección de usuario solo para modificar o eliminar -->
+    <ng-container *ngIf="accionUsuario === 'modificar' || accionUsuario === 'eliminar'">
+      <label>Selecciona usuario:</label>
+      <div class="selector-grupo">
+        <button
+          type="button"
+          *ngFor="let usuario of getUsuariosUnicos()"
+          [class.selected]="usuarioSeleccionado === usuario"
+          (click)="usuarioSeleccionado = usuario; prepararEdicion()">
+          {{ usuario }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Formulario para agregar -->
+    <ng-container *ngIf="accionUsuario === 'agregar'">
+      <label>Nombre:</label>
+      <input [(ngModel)]="nuevoNombreApellido" placeholder="Nombre completo" />
+      <label>Edad:</label>
+      <input [(ngModel)]="nuevaEdad" type="number" placeholder="Edad" />
+    </ng-container>
+
+    <!-- Formulario para modificar -->
+    <ng-container *ngIf="accionUsuario === 'modificar' && usuarioSeleccionado">
+      <label>Nuevo nombre:</label>
+      <input [(ngModel)]="nuevoNombreEditar" placeholder="Nuevo nombre" />
+      <label>Nueva edad:</label>
+      <input [(ngModel)]="nuevaEdadEditar" type="number" placeholder="Nueva edad" />
+    </ng-container>
+
+    <div class="botones">
+      <button *ngIf="accionUsuario === 'agregar'" (click)="agregarPersonaEnTodasLasTablas()">
+        <i class="fa-solid fa-user-plus"></i> Agregar
+      </button>
+      <button *ngIf="accionUsuario === 'modificar' && usuarioSeleccionado" (click)="editarUsuarioEnTodasLasTablas(usuarioSeleccionado, nuevoNombreEditar, nuevaEdadEditar); mostrarFormulario = false;">
+        <i class="fa-solid fa-user-pen"></i> Guardar Cambios
+      </button>
+      <button *ngIf="accionUsuario === 'eliminar' && usuarioSeleccionado" (click)="eliminarUsuarioEnTodasLasTablas(usuarioSeleccionado); mostrarFormulario = false;">
+        <i class="fa-solid fa-user-xmark"></i> Eliminar
+      </button>
+      <button (click)="mostrarFormulario = false">
+        <i class="fa-solid fa-xmark"></i> Cancelar
+      </button>
+    </div>
+  </div>
+</ng-container>
+
+<!-- Selector de motivo SOLO si se activa desde el menú -->
+<ng-container *ngIf="mostrarRegistrarMotivoTodos">
+  <div class="modal-form">
+    <label>¿En qué Area desea registrar el motivo?🤔</label>
+    <div class="selector-grupo">
+      <button type="button" [class.selected]="tablaSeleccionada === 1" (click)="tablaSeleccionada = 1; mesSeleccionado = ''; semanaSeleccionada = 0;">Celugrama</button>
+      <button type="button" [class.selected]="tablaSeleccionada === 2" (click)="tablaSeleccionada = 2; mesSeleccionado = ''; semanaSeleccionada = 0;">Somos Uno</button>
+      <button type="button" [class.selected]="tablaSeleccionada === 3" (click)="tablaSeleccionada = 3; mesSeleccionado = ''; semanaSeleccionada = 0;">Intercesión</button>
+    </div>
+    <ng-container *ngIf="tablaSeleccionada">
+      <label>Mes:📅</label>
+      <div class="selector-grupo">
+        <button 
+          type="button"
+          *ngFor="let mes of ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']"
+          [class.selected]="mesSeleccionado === mes"
+          (click)="mesSeleccionado = mes; semanaSeleccionada = 0;">
+          {{ mes | titlecase }}
+        </button>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="tablaSeleccionada && mesSeleccionado">
+      <label>Semana:📅</label>
+      <div class="selector-grupo">
+        <button 
+          type="button"
+          *ngFor="let semana of [1,2,3,4,5]"
+          [class.selected]="semanaSeleccionada === semana"
+          (click)="semanaSeleccionada = semana">
+          {{ semana }}
+        </button>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="tablaSeleccionada && mesSeleccionado && semanaSeleccionada">
+      <label>Motivo para todos:</label>
+      <div class="selector-grupo">
+        <button type="button" [class.selected]="motivoSeleccionado === '🎉'" (click)="motivoSeleccionado = '🎉'">Feriado</button>
+        <button type="button" [class.selected]="motivoSeleccionado === '🚫'" (click)="motivoSeleccionado = '🚫'">No Hubo</button>
+      </div>
+      <div class="botones">
+        <button (click)="registrarMotivoATodos(semanaSeleccionada, mesSeleccionado, tablaSeleccionada, motivoSeleccionado)">
+          <i class="fa-solid fa-calendar-xmark"></i> Registrar motivo a todos
+        </button>
+        <button (click)="mostrarRegistrarMotivoTodos = false" type="button">
+          <i class="fa-solid fa-xmark"></i> Cerrar
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="mostrarRegistrarOfrenda">
+  <div class="modal-form">
+    <label>Mes:</label>
+<div class="selector-grupo">
+  <button 
+    type="button"
+    *ngFor="let mes of ['enero','febrero','marzo','abril','mayo','junio']"
+    [class.selected]="mesOfrenda === mes"
+    (click)="mesOfrenda = mes">
+    {{ mes | titlecase }}
+  </button>
+</div>
+<label>Semana:</label>
+<div class="selector-grupo">
+  <button 
+    type="button"
+    *ngFor="let semana of [1,2,3,4,5]"
+    [class.selected]="semanaOfrenda === semana"
+    (click)="semanaOfrenda = semana">
+    {{ semana }}
+  </button>
+      </div>
+      <!-- Campo para cantidad de personas (círculos azules) -->
+      <label>Cantidad de personas que ofrendaron:</label>
+      <input type="number" [(ngModel)]="cantidadPersonasOfrenda" min="0" />
+
+      <button (click)="marcarPersonasOfrendaHoja2(mesOfrenda, semanaOfrenda, cantidadPersonasOfrenda)">
+        Registrar Personas
+      </button>
+
+      <!-- Campo para cantidad de ofrendas (número) -->
+      <label>Cantidad de ofrendas:</label>
+      <input type="number" [(ngModel)]="cantidadOfrenda" min="0" />
+
+      <button (click)="registrarOfrendaHoja2(mesOfrenda, semanaOfrenda, cantidadOfrenda)">
+        Registrar Ofrenda
+      </button>
+
+      <button (click)="mostrarRegistrarOfrenda = false">
+        <i class="fa-solid fa-xmark"></i> Cerrar
+      </button>
+    </div>
+</ng-container>

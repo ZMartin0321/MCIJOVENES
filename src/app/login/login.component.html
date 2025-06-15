@@ -1,0 +1,50 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">   
+      <div class="logo"  id="logo"></div>
+      <h1>  MCI Machala</h1>
+    </div>
+    
+    
+    <form (ngSubmit)="login()" class="login-form">
+      <div class="form-group">
+        <label for="usuario">
+          <i class="fas fa-user"></i>
+          Usuario
+        </label>
+        <input 
+          id="usuario"
+          [(ngModel)]="usuario" 
+          name="usuario" 
+          required
+          placeholder="Ingrese su usuario"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">
+          <i class="fas fa-lock"></i>
+          Contraseña
+        </label>
+        <input 
+          id="password"
+          [(ngModel)]="contrasena" 
+          name="contrasena" 
+          type="password" 
+          required
+          placeholder="Ingrese su contraseña"
+        />
+      </div>
+
+      <button type="submit" class="login-button">
+        <i class="fas fa-sign-in-alt"></i>
+        Ingresar
+      </button>
+    </form>
+
+    <div *ngIf="error" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
+  </div>
+</div>
